@@ -173,6 +173,7 @@ export function formatPrice(price: number, currency: string = 'RWF'): string {
 export async function processPayment(jobId: string): Promise<{ paymentUrl: string }> {
   return request<{ paymentUrl: string }>(`/jobs/${jobId}/pay`, {
     method: 'POST',
+    body: JSON.stringify({ provider: 'MOCK' }),
   });
 }
 
