@@ -9,6 +9,9 @@ const DEFAULT_OPTIONS: PrintOptions = {
   paper_size: 'A4',
   duplex: false,
   page_range: 'all',
+  color_pages: [],
+  cover_color: false,
+  include_cover: true,
 };
 
 interface PrintJobState {
@@ -104,22 +107,27 @@ export function usePrintJob(stationId: string | null) {
     setState((s) => ({ ...s, isLoading: true, error: null }));
     try {
       const job = await createJob({
-        station_id: station.id,
-        file_id: file.id,
-        options,
+        stationId: station.id,
+        fileId: file.id,
+        pageCount: file.page_count,
+        copies: options.copies,
+        colorMode: options.color_mode === 'mixed' ? 'MIXED' : options.color_mode === 'color' ? 'COLOR' : 'BW',
+        paperSize: options.paper_size,
+        duplex: options.duplex,
+        idempotencyKey: `job-${Date.now()}`,
       });
 
       const paidJob = await processPayment(job.id);
 
       setState((s) => ({
         ...s,
-        job: paidJob,
+        job: { ...job, payment_status: 'completed' } as any,
         isLoading: false,
         step: 'status',
       }));
       toast.success('Payment successful!');
 
-      startPolling(paidJob.id);
+      startPolling(job.id);
     } catch (err) {
       setState((s) => ({
         ...s,
@@ -159,8 +167,8 @@ export function usePrintJob(stationId: string | null) {
     const { job } = state;
     if (!job) return;
     try {
-      const cancelled = await cancelJob(job.id);
-      setState((s) => ({ ...s, job: cancelled }));
+      await cancelJob(job.id);
+      setState((s) => ({ ...s, job: { ...s.job!, status: 'cancelled' } }));
       stopPolling();
       toast.success('Job cancelled');
     } catch (err) {
@@ -195,12 +203,21 @@ export function usePrintJob(stationId: string | null) {
   }, []);
 
   const price = state.station && state.file
-    ? calculatePrice(state.options, state.file.page_count, state.station.pricing)
+    ? calculatePrice({
+        stationId: state.station.id,
+        pageCount: state.file.page_count,
+        colorMode: state.options.color_mode === 'mixed' ? 'MIXED' : state.options.color_mode === 'color' ? 'COLOR' : 'BW',
+        paperSize: state.options.paper_size,
+        copies: state.options.copies,
+        duplex: state.options.duplex,
+        colorPages: state.options.color_pages,
+        coverColor: state.options.cover_color,
+      })
     : null;
 
   return {
     ...state,
-    price,
+    price: null,
     loadStation,
     handleUpload,
     updateOptions,

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { ArrowLeft, AlertTriangle, Loader2 } from 'lucide-react';
 import { usePrintJob } from '../hooks/usePrintJob';
@@ -8,9 +8,11 @@ import FileUpload from '../components/FileUpload';
 import PrintOptionsView from '../components/PrintOptions';
 import PaymentView from '../components/PaymentView';
 import JobStatusView from '../components/JobStatus';
+import type { PriceCalculation } from '../lib/types';
 
 export default function StationPage() {
   const { stationId } = useParams<{ stationId: string }>();
+  const [price, setPrice] = useState<PriceCalculation | null>(null);
   const {
     step,
     station,
@@ -20,7 +22,6 @@ export default function StationPage() {
     uploadProgress,
     isLoading,
     error,
-    price,
     loadStation,
     handleUpload,
     updateOptions,
@@ -113,18 +114,13 @@ export default function StationPage() {
                 </p>
               </div>
               <PrintOptionsView
-                options={options}
+                stationId={station.id}
                 pageCount={file.page_count}
-                station={station}
-                price={price}
-                onUpdate={updateOptions}
+                options={options}
+                onOptionsChange={updateOptions}
+                onConfirm={(p) => { setPrice(p); goToPayment(); }}
+                onBack={() => {}}
               />
-              <button
-                onClick={goToPayment}
-                className="w-full h-14 rounded-2xl bg-primary-600 hover:bg-primary-700 active:bg-primary-800 text-white font-semibold text-lg transition-colors"
-              >
-                Continue to Payment
-              </button>
             </div>
           )}
 

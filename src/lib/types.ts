@@ -1,23 +1,17 @@
+export type FlowStep = 'upload' | 'options' | 'payment' | 'processing' | 'completed' | 'failed' | 'status';
+
 export interface Station {
   id: string;
+  code: string;
   name: string;
-  logo_url?: string;
-  location?: string;
+  location: string;
   is_active: boolean;
-  pricing: PricingConfig;
-  settings: StationSettings;
-}
-
-export interface PricingConfig {
-  price_per_page_bw: number;
-  price_per_page_color: number;
-  currency: string;
-}
-
-export interface StationSettings {
-  max_file_size_mb: number;
-  allowed_formats: string[];
-  max_copies: number;
+  created_at: string;
+  logo_url?: string;
+  pricing?: {
+    bwPerPage: number;
+    colorPerPage: number;
+  };
 }
 
 export interface UploadedFile {
@@ -33,50 +27,54 @@ export interface UploadedFile {
 
 export interface PrintOptions {
   copies: number;
-  color_mode: 'bw' | 'color';
-  paper_size: 'A4' | 'A3' | 'A5' | 'Letter';
+  color_mode: 'bw' | 'color' | 'mixed';
+  paper_size: 'A3' | 'A4' | 'A5' | 'LETTER';
   duplex: boolean;
   page_range: string;
+  color_pages?: number[];
+  cover_color?: boolean;
+  include_cover?: boolean;
+}
+
+export interface PriceBreakdown {
+  colorPages: number;
+  bwPages: number;
+  colorPrice: number;
+  bwPrice: number;
+}
+
+export interface PriceCalculation {
+  pricePerPage: number;
+  pageCount: number;
+  copies: number;
+  paperSizeMultiplier: number;
+  duplexDiscount: number;
+  totalPrice: number;
+  currency: string;
+  colorPagesCount: number;
+  bwPagesCount: number;
+  breakdown: PriceBreakdown;
 }
 
 export interface Job {
   id: string;
   station_id: string;
-  file_id: string;
-  file?: UploadedFile;
   status: JobStatus;
-  options: PrintOptions;
-  total_price: number;
+  original_name: string;
+  page_count: number;
+  copies: number;
+  color_mode: string;
+  paper_size: string;
+  duplex: boolean;
+  price: number;
   currency: string;
   payment_status: PaymentStatus;
-  payment_method?: string;
-  estimated_completion?: string;
   created_at: string;
   updated_at: string;
   error_message?: string;
+  estimated_completion?: string;
+  total_price?: number;
 }
 
-export type JobStatus =
-  | 'pending'
-  | 'uploaded'
-  | 'options_set'
-  | 'payment_pending'
-  | 'payment_completed'
-  | 'queued'
-  | 'printing'
-  | 'completed'
-  | 'failed'
-  | 'cancelled';
-
-export type PaymentStatus = 'pending' | 'completed' | 'failed' | 'refunded';
-
-export type FlowStep = 'upload' | 'options' | 'payment' | 'status';
-
-export interface PriceCalculation {
-  per_page: number;
-  pages: number;
-  copies: number;
-  subtotal: number;
-  total: number;
-  currency: string;
-}
+export type JobStatus = 'pending' | 'uploaded' | 'options_set' | 'payment_pending' | 'payment_completed' | 'queued' | 'printing' | 'completed' | 'failed' | 'cancelled';
+export type PaymentStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'refunded';

@@ -47,8 +47,8 @@ export default function JobStatusPage() {
     if (!job) return;
     try {
       const { cancelJob } = await import('../lib/api');
-      const cancelled = await cancelJob(job.id);
-      setJob(cancelled);
+      await cancelJob(job.id);
+      setJob({ ...job, status: 'cancelled' });
     } catch {
       // error handled by toast
     }

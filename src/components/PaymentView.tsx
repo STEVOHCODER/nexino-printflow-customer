@@ -70,7 +70,7 @@ export default function PaymentView({
           <div className="flex justify-between items-baseline">
             <span className="text-sm text-gray-500">Total</span>
             <span className="text-3xl font-bold text-primary-600 tabular-nums">
-              {formatPrice(price.total, price.currency)}
+              {formatPrice(price.totalPrice, price.currency)}
             </span>
           </div>
         </div>
@@ -102,7 +102,7 @@ export default function PaymentView({
         ) : (
           <>
             <Check className="w-5 h-5" />
-            PAY NOW — {formatPrice(price.total, price.currency)}
+            PAY NOW — {formatPrice(price.totalPrice, price.currency)}
           </>
         )}
       </button>

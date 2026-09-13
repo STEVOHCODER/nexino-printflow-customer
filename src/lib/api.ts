@@ -140,6 +140,8 @@ export async function calculatePrice(options: {
   paperSize: string;
   copies: number;
   duplex: boolean;
+  colorPages?: number[];
+  coverColor?: boolean;
 }): Promise<PriceCalculation> {
   return request<PriceCalculation>('/jobs/calculate-price', {
     method: 'POST',
@@ -158,11 +160,14 @@ export async function createJob(data: {
   pageRange?: string;
   idempotencyKey: string;
 }): Promise<Job> {
-  const raw = await request<any>('/jobs', {
+  return request('/jobs', {
     method: 'POST',
     body: JSON.stringify(data),
   });
-  return mapJob(raw);
+}
+
+export function formatPrice(price: number, currency: string = 'RWF'): string {
+  return `${price.toLocaleString()} ${currency}`;
 }
 
 export async function processPayment(jobId: string): Promise<{ paymentUrl: string }> {

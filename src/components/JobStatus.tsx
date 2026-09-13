@@ -135,7 +135,7 @@ export default function JobStatusView({ job, onCancel, onRetry }: JobStatusProps
           </div>
           <div className="flex justify-between">
             <span className="text-gray-500">Total</span>
-            <span className="text-gray-900 font-semibold">{formatPrice(job.total_price, job.currency)}</span>
+            <span className="text-gray-900 font-semibold">{formatPrice(job.price || job.total_price || 0, job.currency)}</span>
           </div>
         </div>
       </div>
