@@ -160,10 +160,11 @@ export async function createJob(data: {
   pageRange?: string;
   idempotencyKey: string;
 }): Promise<Job> {
-  return request('/jobs', {
+  const raw = await request<any>('/jobs', {
     method: 'POST',
     body: JSON.stringify(data),
   });
+  return mapJob(raw);
 }
 
 export function formatPrice(price: number, currency: string = 'RWF'): string {
