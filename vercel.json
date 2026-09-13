@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://nexino-printflow-api.vercel.app/api/:path*"
+      "destination": "https://backend-mauve-delta-32.vercel.app/api/:path*"
     },
     {
       "source": "/((?!assets/).*)",
