@@ -136,6 +136,7 @@ export default function StationPage() {
                 file={file}
                 options={options}
                 price={price}
+                stationId={station?.id || ''}
                 isLoading={isLoading}
                 onPay={handlePayment}
               />

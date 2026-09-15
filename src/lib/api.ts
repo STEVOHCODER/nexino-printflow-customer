@@ -186,3 +186,21 @@ export async function getJobStatus(jobId: string): Promise<Job> {
 export async function cancelJob(jobId: string): Promise<void> {
   await request(`/jobs/${jobId}/cancel`, { method: 'POST' });
 }
+
+export interface StationReadiness {
+  ready: boolean;
+  isOnline: boolean;
+  hasBlockingError: boolean;
+  hasPaperEmpty: boolean;
+  blockingReason: string;
+  printers: Array<{
+    name: string;
+    status: string;
+    paperStatus: string;
+    tonerStatus: string;
+  }>;
+}
+
+export async function checkStationReadiness(stationId: string): Promise<StationReadiness> {
+  return request<StationReadiness>(`/agent/station/${stationId}/readiness`);
+}

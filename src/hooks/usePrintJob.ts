@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
 import type { Station, UploadedFile, Job, PrintOptions, FlowStep } from '../lib/types';
-import { uploadFile, createJob, processPayment, cancelJob, calculatePrice, getStation } from '../lib/api';
+import { uploadFile, createJob, processPayment, cancelJob, calculatePrice, getStation, checkStationReadiness } from '../lib/api';
 import toast from 'react-hot-toast';
 
 const DEFAULT_OPTIONS: PrintOptions = {
@@ -105,6 +105,26 @@ export function usePrintJob(stationId: string | null) {
     if (!station || !file) return;
 
     setState((s) => ({ ...s, isLoading: true, error: null }));
+
+    // PRE-PAYMENT CHECK: Verify printer hardware is ready before allowing payment
+    try {
+      const readiness = await checkStationReadiness(station.id);
+      if (!readiness.ready) {
+        const reason = readiness.blockingReason || 'Printer is not ready';
+        setState((s) => ({
+          ...s,
+          isLoading: false,
+          error: reason,
+        }));
+        toast.error(reason);
+        return;
+      }
+    } catch (err) {
+      // If readiness check fails (network error), allow payment to proceed
+      // (the agent will handle printer errors downstream)
+      console.warn('Readiness check failed, proceeding with payment:', err);
+    }
+
     try {
       const job = await createJob({
         stationId: station.id,
